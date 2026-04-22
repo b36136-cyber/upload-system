@@ -14,53 +14,65 @@
 let folder = "";
 
 async function login() {
-  const res = await fetch("/api/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      username: user.value,
-      password: pass.value
-    })
-  });
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        username: document.getElementById("user").value,
+        password: document.getElementById("pass").value
+      })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!data.folder) {
-    alert("Login failed");
-    return;
+    if (!data.folder) {
+      alert("Login failed");
+      return;
+    }
+
+    folder = data.folder;
+    document.getElementById("file").click();
+
+  } catch (err) {
+    console.error(err);
+    alert("Error");
   }
-
-  folder = data.folder;
-  document.getElementById("file").click();
 }
 
 document.getElementById("file").addEventListener("change", async function () {
-  const file = this.files[0];
+  try {
+    const file = this.files[0];
 
-  const sigRes = await fetch("/api/signature", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ folder })
-  });
+    const sigRes = await fetch("/api/signature", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ folder })
+    });
 
-  const sigData = await sigRes.json();
+    const sigData = await sigRes.json();
 
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("api_key", sigData.apiKey);
-  formData.append("timestamp", sigData.timestamp);
-  formData.append("signature", sigData.signature);
-  formData.append("folder", folder);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", sigData.apiKey);
+    formData.append("timestamp", sigData.timestamp);
+    formData.append("signature", sigData.signature);
+    formData.append("folder", folder);
 
-  const upload = await fetch(`https://api.cloudinary.com/v1_1/${sigData.cloudName}/image/upload`, {
-    method: "POST",
-    body: formData
-  });
+    const upload = await fetch(`https://api.cloudinary.com/v1_1/${sigData.cloudName}/image/upload`, {
+      method: "POST",
+      body: formData
+    });
 
-  const result = await upload.json();
+    const result = await upload.json();
 
-  document.getElementById("result").innerText = result.secure_url;
-}
+    document.getElementById("result").innerText = result.secure_url;
+
+  } catch (err) {
+    console.error(err);
+    alert("Upload error");
+  }
+});
 </script>
 
 </body>
