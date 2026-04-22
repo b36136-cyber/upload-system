@@ -1,11 +1,13 @@
 import crypto from "crypto";
 
-export default function handler(req, res) {
-  const API_KEY = "679431861611368";
-  const API_SECRET = "Jt2XotbfOCZufGADTsE4Paryppc";
+export default async function handler(req, res) {
+  const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+
+  const API_KEY = "YOUR_API_KEY";
+  const API_SECRET = "YOUR_API_SECRET";
   const CLOUD_NAME = "dbnqte8qd";
 
-  const { folder } = req.body;
+  const { folder } = body;
 
   const timestamp = Math.floor(Date.now() / 1000);
 
